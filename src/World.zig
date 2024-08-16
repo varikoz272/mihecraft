@@ -36,17 +36,17 @@ pub fn CakeWorld(comptime width: usize, comptime length: usize) type {
             }
         }
 
-        pub fn Draw(self: Self) void {
+        pub fn Draw(self: Self, cam_location: rl.Vector3) void {
             const grass_blocks = &self.combo.grass.items;
             const stone_blocks = &self.combo.stone.items;
             const sand_blocks = &self.combo.sand.items;
             const water_blocks = &self.combo.water.items;
 
             for (0..self.combo.GetCapacity()) |i| {
-                if (i < grass_blocks.len) grass_blocks.*[i].DrawSimple();
-                if (i < stone_blocks.len) stone_blocks.*[i].DrawSimple();
-                if (i < sand_blocks.len) sand_blocks.*[i].DrawSimple();
-                if (i < water_blocks.len) water_blocks.*[i].DrawSimple();
+                if (i < grass_blocks.len) grass_blocks.*[i].DrawSimple(cam_location);
+                if (i < stone_blocks.len) stone_blocks.*[i].DrawSimple(cam_location);
+                if (i < sand_blocks.len) sand_blocks.*[i].DrawSimple(cam_location);
+                if (i < water_blocks.len) water_blocks.*[i].DrawSimple(cam_location);
             }
         }
     };
@@ -67,9 +67,9 @@ pub fn FlatWorld(comptime width: usize, comptime length: usize) type {
         }
 
         /// Before drawing, rl.BeginDrawing and rl.Begin3DMode should be called
-        pub fn Draw(self: Self) void {
+        pub fn Draw(self: Self, cam_location: rl.Vector3) void {
             for (self.blocks) |cur_block| {
-                cur_block.DrawSimple();
+                cur_block.DrawSimple(cam_location);
             }
         }
     };

@@ -15,9 +15,21 @@ pub fn Block(comptime T: BlockType) type {
         }
 
         /// Before drawing, rl.BeginDrawing and rl.Begin3DMode should be called
-        pub fn DrawSimple(self: Self) void {
+        pub fn DrawSimple(self: Self, cam_location: rl.Vector3) void {
             rl.DrawCube(self.location.ToRl(), 1.0, 1.0, 1.0, T.Color());
-            rl.DrawCubeWires(self.location.ToRl(), 1.0, 1.0, 1.0, T.Darker());
+            if (self.IsNear(cam_location)) rl.DrawCubeWires(self.location.ToRl(), 1.0, 1.0, 1.0, T.Darker());
+        }
+
+        pub fn IsNear(self: Self, cam_location: rl.Vector3) bool {
+            const x1: f32 = @floatFromInt(self.location.x);
+            const y1: f32 = @floatFromInt(self.location.y);
+            const z1: f32 = @floatFromInt(self.location.z);
+
+            const x2 = cam_location.x;
+            const y2 = cam_location.y;
+            const z2 = cam_location.z;
+
+            return @sqrt(rl.powf(x2 - x1, 2) + rl.powf(y2 - y1, 2) + rl.powf(z2 - z1, 2)) < 10;
         }
     };
 }

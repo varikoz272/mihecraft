@@ -46,7 +46,7 @@ pub fn main() !void {
         rl.BeginMode3D(cam.cam.*);
         defer rl.EndMode3D();
 
-        w.Draw();
+        w.Draw(cam.cam.position);
     }
 
     rl.CloseWindow();
