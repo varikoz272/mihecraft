@@ -18,7 +18,7 @@ pub fn main() !void {
     };
 
     var cam = camera.Camera(camera.CameraType.from(rl.CAMERA_FIRST_PERSON)).Init(&cameraBuffer, "MAIN_CHARACTER");
-    const cube = block.Block(.Grass).init(block.BlockLocation().init(0, 0, 0));
+    const cube = block.Block(.Water).init(block.BlockLocation().init(0, 0, 0));
 
     rl.SetTargetFPS(60);
     rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "mihecraft");

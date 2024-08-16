@@ -51,15 +51,15 @@ pub const BlockType = enum(u4) {
 
     Grass = 0,
     Stone = 1,
+    Sand = 2,
+    Water = 3,
 
     pub fn Color(self: Self) rl.Color {
         switch (self) {
-            .Grass => {
-                return rl.Color{ .r = 0, .g = 255, .b = 0, .a = 255 };
-            },
-            .Stone => {
-                return rl.Color{ .r = 127, .g = 127, .b = 127, .a = 255 };
-            },
+            .Grass => return rl.Color{ .r = 0, .g = 255, .b = 0, .a = 255 },
+            .Stone => return rl.Color{ .r = 127, .g = 127, .b = 127, .a = 255 },
+            .Sand => return rl.Color{ .r = 200, .g = 200, .b = 0, .a = 255 },
+            .Water => return rl.Color{ .r = 0, .g = 32, .b = 255, .a = 127 },
         }
     }
 };
