@@ -4,11 +4,15 @@ const light = @import("Light.zig");
 const model = @import("Model.zig");
 const camera = @import("Camera.zig");
 const block = @import("Block.zig");
+const world = @import("World.zig");
 
 const SCREEN_WIDTH: c_int = 1920;
 const SCREEN_HEIGHT: c_int = 1080;
 
 pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+
     var cameraBuffer = rl.Camera{
         .fovy = 60,
         .position = .{ .x = 0, .y = 10, .z = 0 },
@@ -18,7 +22,8 @@ pub fn main() !void {
     };
 
     var cam = camera.Camera(camera.CameraType.from(rl.CAMERA_FIRST_PERSON)).Init(&cameraBuffer, "MAIN_CHARACTER");
-    const cube = block.Block(.Water).init(block.BlockLocation().init(0, 0, 0));
+    var w = world.CakeWorld(10, 10).Generate(gpa.allocator());
+    defer w.Destroy();
 
     rl.SetTargetFPS(60);
     rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "mihecraft");
@@ -41,7 +46,7 @@ pub fn main() !void {
         rl.BeginMode3D(cam.cam.*);
         defer rl.EndMode3D();
 
-        cube.DrawSimple();
+        w.Draw();
     }
 
     rl.CloseWindow();
