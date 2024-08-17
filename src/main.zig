@@ -1,7 +1,5 @@
 const rl = @import("raylib.zig");
 const std = @import("std");
-const light = @import("Light.zig");
-const model = @import("Model.zig");
 const camera = @import("Camera.zig");
 const block = @import("Block.zig");
 const world = @import("World.zig");
@@ -15,26 +13,29 @@ pub fn main() !void {
 
     var cameraBuffer = rl.Camera{
         .fovy = 60,
-        .position = .{ .x = 0, .y = 10, .z = 0 },
+        .position = .{ .x = 0, .y = 100, .z = 0 },
         .target = .{ .x = 0, .y = 0, .z = 1 },
         .up = .{ .x = 0, .y = 1, .z = 0 },
         .projection = rl.CAMERA_PERSPECTIVE,
     };
 
+    var seed: u64 = 0;
+
     var cam = camera.Camera(camera.CameraType.from(rl.CAMERA_FIRST_PERSON)).Init(&cameraBuffer, "MAIN_CHARACTER");
-    var w = world.CakeWorld(10, 10).Generate(gpa.allocator());
-    defer w.Destroy();
+    var w = world.SingleStructureWorld(500).Generate(seed, gpa.allocator());
 
     rl.SetTargetFPS(60);
     rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "mihecraft");
     rl.ToggleFullscreen();
     rl.DisableCursor();
 
-    // try std.io.getStdOut().writer().print("\n\nSIZE OF BLOCK WITH LOCATION {}\n\n", .{@sizeOf(@TypeOf(block.Block(.Grass).init(block.BlockLocation().init(0, 0, 0))))});
-    // try std.io.getStdOut().writer().print("\n\nSIZE OF BLOCKTYPE {}\n\n", .{@sizeOf(block.BlockType)});
-    // try std.io.getStdOut().writer().print("\n\nSIZE OF BLOCK LOCATION {}\n\n", .{@sizeOf(block.BlockLocation())});
-
     while (!rl.WindowShouldClose()) {
+        if (rl.IsKeyDown(rl.KEY_G)) {
+            seed +%= 1;
+            w.Destroy();
+            w = world.SingleStructureWorld(500).Generate(seed, gpa.allocator());
+        }
+
         cam.Update();
 
         rl.BeginDrawing();
@@ -48,6 +49,8 @@ pub fn main() !void {
 
         w.Draw(cam.cam.position);
     }
+
+    w.Destroy();
 
     rl.CloseWindow();
 }
