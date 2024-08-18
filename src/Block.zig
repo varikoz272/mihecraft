@@ -1,14 +1,14 @@
 const rl = @import("raylib.zig");
 const std = @import("std");
 
-pub fn Block(comptime T: BlockType) type {
+pub fn Block(comptime T: Type) type {
     return struct {
         pub const Self = @This();
         const Type = T;
 
-        location: BlockLocation(),
+        location: Location(),
 
-        pub fn init(location: BlockLocation()) Self {
+        pub fn init(location: Location()) Self {
             return Self{
                 .location = location,
             };
@@ -34,7 +34,7 @@ pub fn Block(comptime T: BlockType) type {
     };
 }
 
-pub fn BlockLocation() type {
+pub fn Location() type {
     return struct {
         const Self = @This();
 
@@ -69,7 +69,7 @@ pub fn BlockLocation() type {
     };
 }
 
-pub fn BlockCombo(capacity: usize) type {
+pub fn Combo(capacity: usize) type {
     return struct {
         const Self = @This();
         const Capacity = capacity;
@@ -105,7 +105,7 @@ pub fn BlockCombo(capacity: usize) type {
     };
 }
 
-pub const BlockType = enum(u4) {
+pub const Type = enum(u4) {
     const Self = @This();
 
     Grass = 0,

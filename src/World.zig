@@ -11,11 +11,11 @@ pub fn SingleStructureWorld(size: usize) type {
         allocator: std.mem.Allocator,
 
         seed: u64,
-        combo: block.BlockCombo(Size),
+        combo: block.Combo(Size),
 
         pub fn Generate(seed: usize, allocator: std.mem.Allocator) Self {
             var self = Self{
-                .combo = block.BlockCombo(Size).init(allocator),
+                .combo = block.Combo(Size).init(allocator),
                 .allocator = allocator,
                 .seed = seed,
             };
@@ -30,7 +30,7 @@ pub fn SingleStructureWorld(size: usize) type {
         }
 
         fn Fill(self: *Self, allocator: std.mem.Allocator) void {
-            const river = stc.River(block.BlockType.Water, Size, self.seed, allocator);
+            const river = stc.River(block.Type.Water, Size, self.seed, allocator);
             defer allocator.free(river);
 
             self.combo.water.appendSlice(river) catch @panic("Out of memory on appending std.Arraylist");
@@ -59,12 +59,12 @@ pub fn CakeWorld(comptime width: usize, comptime length: usize) type {
         const Width = width;
         const Length = length;
 
-        combo: block.BlockCombo(Width * Length),
+        combo: block.Combo(Width * Length),
         allocator: std.mem.Allocator,
 
         pub fn Generate(allocator: std.mem.Allocator) Self {
             var self = Self{
-                .combo = block.BlockCombo(Width * Length).init(allocator),
+                .combo = block.Combo(Width * Length).init(allocator),
                 .allocator = allocator,
             };
             self.FillLayers();
@@ -79,10 +79,10 @@ pub fn CakeWorld(comptime width: usize, comptime length: usize) type {
             const maximum_per_layer = self.combo.GetCapacity();
 
             for (0..maximum_per_layer) |i| {
-                self.combo.stone.append(block.Block(.Stone).init(block.BlockLocation().init(0, 0, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
-                self.combo.water.append(block.Block(.Water).init(block.BlockLocation().init(0, 1, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
-                self.combo.sand.append(block.Block(.Sand).init(block.BlockLocation().init(0, 2, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
-                self.combo.grass.append(block.Block(.Grass).init(block.BlockLocation().init(0, 3, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
+                self.combo.stone.append(block.Block(.Stone).init(block.Location().init(0, 0, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
+                self.combo.water.append(block.Block(.Water).init(block.Location().init(0, 1, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
+                self.combo.sand.append(block.Block(.Sand).init(block.Location().init(0, 2, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
+                self.combo.grass.append(block.Block(.Grass).init(block.Location().init(0, 3, @intCast(i)))) catch @panic("Out of memory on appending std.Arraylist");
             }
         }
 
@@ -130,7 +130,7 @@ fn generateFlatSurface(y: i32, comptime width: usize, comptime length: usize) [w
 
     for (0..width) |x| {
         for (0..length) |z|
-            surface[x + z * width] = block.Block(.Grass).init(block.BlockLocation().init(@intCast(x), y, @intCast(z)));
+            surface[x + z * width] = block.Block(.Grass).init(block.Location().init(@intCast(x), y, @intCast(z)));
     }
 
     return surface;
