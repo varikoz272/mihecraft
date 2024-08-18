@@ -9,21 +9,25 @@ pub fn River(comptime T: block.BlockType, len: usize, seed: u64, allocator: std.
     const rand = prng.random();
 
     var river: []block.Block(T) = allocator.alloc(block.Block(T), len) catch @panic("Out of memory on appending std.Arraylist");
+    const angle = rand.float(f32) * 360;
 
     for (river, 0..) |*cur_block, x| {
         cur_block.* = block.Block(T).init(block.BlockLocation().init(@intCast(x), 0, 0));
+        rotateSingle(T, cur_block, angle, river[0].location);
     }
 
-    const angle = rand.float(f32) * 360;
-    rotateFromBeginToEnd(T, &river, angle);
     swizzleStraightByX(T, &river);
 
     return river;
 }
 
-// fn rotateSingle(comptime T: block.BlockType, single_block: *block.Block(T), angle, center: block.BlockLocation()) void {
-//
-// }
+fn rotateSingle(comptime T: block.BlockType, single_block: *block.Block(T), angle: f32, center: block.BlockLocation()) void {
+    const center_f32 = center.ToRl();
+    const theta: f32 = angle * std.math.pi / 180.0;
+    const single_block_f32 = single_block.location.ToRl();
+    single_block.location.x = @intFromFloat(center_f32.x + @cos(theta) * (single_block_f32.x - center_f32.x) - @sin(theta) * (single_block_f32.z - center_f32.z));
+    single_block.location.z = @intFromFloat(center_f32.z + @sin(theta) * (single_block_f32.x - center_f32.x) + @cos(theta) * (single_block_f32.z - center_f32.z));
+}
 
 fn rotateWithCenter(comptime T: block.BlockType, structure: *[]block.Block(T), angle: f32, center: block.BlockLocation()) void {
     const center_f32 = center.ToRl();
