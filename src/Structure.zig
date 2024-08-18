@@ -8,17 +8,15 @@ pub fn River(comptime T: block.Type, len: usize, seed: u64, allocator: std.mem.A
     var prng = std.Random.DefaultPrng.init(seed);
     const rand = prng.random();
 
-    var river: []block.Block(T) = allocator.alloc(block.Block(T), len) catch @panic("Out of memory on appending std.Arraylist");
+    const river: []block.Block(T) = allocator.alloc(block.Block(T), len) catch @panic("Out of memory on appending std.Arraylist");
     const angle = rand.float(f32) * 360;
-    _ = angle;
 
+    var theta_swizzle: f32 = 0.0;
     for (river, 0..) |*cur_block, x| {
         cur_block.* = block.Block(T).init(block.Location().init(@intCast(x), 0, 0));
-        // rotateSingle(T, cur_block, angle, river[0].location);
+        swizzle(&cur_block.location, Axis.Z, &theta_swizzle, 5.0);
+        rotateSingle(T, cur_block, angle, river[0].location);
     }
-
-    // rotateFromBeginToEnd(T, &river, angle);
-    swizzleStraightAlongX(T, &river);
 
     return river;
 }
@@ -46,15 +44,36 @@ fn rotateFromBeginToEnd(comptime T: block.Type, structure: *[]block.Block(T), an
     rotateWithCenter(T, structure, angle, structure.*[0].location);
 }
 
-fn swizzleStraightAlongX(comptime T: block.Type, structure: *[]block.Block(T)) void {
+const Axis = enum {
+    const Self = @This();
+
+    X,
+    Y,
+    Z,
+
+    pub fn AxisFromLocation(self: Self, loc: *block.Location()) *i32 {
+        switch (self) {
+            .X => return &loc.x,
+            .Y => return &loc.y,
+            .Z => return &loc.z,
+        }
+    }
+};
+
+fn swizzle(target: *block.Location(), axis: Axis, theta: *f32, factor: f32) void {
+    const theta_sin = @sin(theta.*);
+    const target_axis = axis.AxisFromLocation(target);
+
+    target_axis.* = @intFromFloat(theta_sin * factor);
+
+    theta.* += 0.03;
+}
+
+fn swizzleStraightAlongZ(comptime T: block.Type, structure: *[]block.Block(T)) void {
     var theta: f32 = 0;
 
     for (structure.*) |*item| {
-        const theta_sin = @sin(theta);
-        const loc_f32 = item.location.ToF32();
-        item.location.z = @intFromFloat(loc_f32.z + theta_sin * 5);
-
-        theta += 0.03;
+        swizzle(&item.location, Axis.Z, &theta, 5);
     }
 }
 
