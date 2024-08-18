@@ -37,9 +37,6 @@ pub fn build(b: *std.Build) !void {
         run_cmd.addArgs(args);
     }
 
-    const run_step = b.step("run", "Run the app");
-    run_step.dependOn(&run_cmd.step);
-
     //====================================================== UNIT TESTS =================================
 
     const exe_unit_tests = b.addTest(.{
@@ -52,4 +49,10 @@ pub fn build(b: *std.Build) !void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_exe_unit_tests.step);
+
+    //====================================================== /UNIT TESTS ================================
+
+    const run_step = b.step("run", "Run the app");
+    run_step.dependOn(&run_exe_unit_tests.step);
+    run_step.dependOn(&run_cmd.step);
 }
