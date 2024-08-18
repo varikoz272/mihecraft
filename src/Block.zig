@@ -58,13 +58,13 @@ pub fn BlockLocation() type {
             };
         }
 
-        pub fn SpaceBetween(self: Self, p: Self) f32 {
+        pub fn SpaceBetweenXZ(self: Self, p: Self) f32 {
             const x0: f32 = @floatFromInt(self.x);
             const x1: f32 = @floatFromInt(p.x);
-            const y0: f32 = @floatFromInt(self.y);
-            const y1: f32 = @floatFromInt(p.y);
+            const z0: f32 = @floatFromInt(self.z);
+            const z1: f32 = @floatFromInt(p.z);
 
-            return @sqrt(rl.powf(x1 - x0, 2.0) + rl.powf(y1 - y0, 2.0));
+            return @sqrt(rl.powf(x1 - x0, 2.0) + rl.powf(z1 - z0, 2.0));
         }
     };
 }
