@@ -1,23 +1,25 @@
 const rl = @import("raylib.zig");
 const std = @import("std");
 const block = @import("Block.zig");
-const c = @cImport(@cInclude("stdio.h"));
 
 /// Generates structure from 0,0,0 (shift if needed)
-pub fn River(comptime T: block.Type, len: usize, seed: u64, allocator: std.mem.Allocator) []block.Block(T) {
+pub fn River(comptime T: block.Type, len: usize, seed: u64, allocator: std.mem.Allocator) Struct(T) {
     var prng = std.Random.DefaultPrng.init(seed);
     const rand = prng.random();
 
-    const river: []block.Block(T) = allocator.alloc(block.Block(T), len) catch @panic("Out of memory on appending std.Arraylist");
+    var riverData = std.ArrayList(block.Block(T)).init(allocator);
+
     const angle = rand.float(f32) * 360;
 
     var theta_swizzle: f32 = 0.0;
-    for (river, 0..) |*cur_block, x| {
-        cur_block.* = block.Block(T).init(block.Location().init(@intCast(x), 0, 0));
-        swizzle(&cur_block.location, Axis.Z, &theta_swizzle, 5.0);
-        rotateSingle(T, cur_block, angle, river[0].location);
+    for (0..len) |x| {
+        riverData.append(block.Block(T).init(block.Location().init(@intCast(x), 0, 0))) catch unreachable;
+        swizzle(&riverData.items[x].location, Axis.Z, &theta_swizzle, 5.0);
+        rotateSingle(T, &riverData.items[x], angle, riverData.items[0].location);
+        // riverData.append(cur_block) catch unreachable;
     }
 
+    const river = Struct(T).arrayListInit(riverData);
     return river;
 }
 
@@ -42,6 +44,36 @@ fn rotateWithCenter(comptime T: block.Type, structure: *[]block.Block(T), angle:
 
 fn rotateFromBeginToEnd(comptime T: block.Type, structure: *[]block.Block(T), angle: f32) void {
     rotateWithCenter(T, structure, angle, structure.*[0].location);
+}
+
+pub fn Struct(comptime T: block.Type) type {
+    return struct {
+        const Self = @This();
+
+        data: []block.Block(T),
+        allocated: []block.Block(T),
+        allocator: std.mem.Allocator,
+
+        pub fn init(data: *[]block.Block(T), allocator: std.mem.Allocator) Self {
+            return Self{
+                .data = data,
+                .allocated = data,
+                .allocator = allocator,
+            };
+        }
+
+        pub fn arrayListInit(buffer: std.ArrayList(block.Block(T))) Self {
+            return Self{
+                .data = buffer.items.ptr[0..buffer.items.len],
+                .allocated = buffer.items.ptr[0..buffer.capacity],
+                .allocator = buffer.allocator,
+            };
+        }
+
+        pub fn Destroy(self: Self) void {
+            self.allocator.free(self.allocated);
+        }
+    };
 }
 
 const Axis = enum {

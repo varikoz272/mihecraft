@@ -30,7 +30,7 @@ pub fn main() !void {
     rl.DisableCursor();
 
     while (!rl.WindowShouldClose()) {
-        if (rl.IsKeyDown(rl.KEY_G)) {
+        if ((!rl.IsKeyDown(rl.KEY_LEFT_SHIFT) and rl.IsKeyDown(rl.KEY_G)) or (rl.IsKeyPressed(rl.KEY_G) and rl.IsKeyDown(rl.KEY_LEFT_SHIFT))) {
             seed +%= 1;
             w.Destroy();
             w = world.SingleStructureWorld(500).Generate(seed, gpa.allocator());
