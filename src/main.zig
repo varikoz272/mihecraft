@@ -23,7 +23,7 @@ pub fn main() !void {
     var seed: u64 = 0;
 
     var cam = camera.Camera(camera.CameraType.from(rl.CAMERA_FIRST_PERSON)).Init(&cameraBuffer, "MAIN_CHARACTER");
-    var w = world.SingleStructureWorld(stc.Type.River, 500).Generate(seed, gpa.allocator());
+    var w = world.SingleStructureWorld(stc.Type.River, 5000).Generate(seed, gpa.allocator());
 
     rl.SetTargetFPS(60);
     rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "mihecraft");
@@ -34,7 +34,7 @@ pub fn main() !void {
         if ((!rl.IsKeyDown(rl.KEY_LEFT_SHIFT) and rl.IsKeyDown(rl.KEY_G)) or (rl.IsKeyPressed(rl.KEY_G) and rl.IsKeyDown(rl.KEY_LEFT_SHIFT))) {
             seed +%= 1;
             w.Destroy();
-            w = world.SingleStructureWorld(stc.Type.River, 500).Generate(seed, gpa.allocator());
+            w = world.SingleStructureWorld(stc.Type.River, 5000).Generate(seed, gpa.allocator());
         }
 
         cam.Update();
@@ -44,6 +44,7 @@ pub fn main() !void {
 
         rl.ClearBackground(rl.GRAY);
         rl.DrawFPS(10, 10);
+        rl.DrawText("[g] to generate new world", 10, 40, 30, rl.GREEN);
 
         rl.BeginMode3D(cam.cam.*);
         defer rl.EndMode3D();

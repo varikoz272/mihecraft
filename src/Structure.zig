@@ -10,8 +10,8 @@ pub fn River(comptime T: block.Type, len: usize, seed: u64, allocator: std.mem.A
     var riverData = std.ArrayList(block.Block(T)).init(allocator);
 
     const angle = rand.float(f32) * 360;
-
     var theta_swizzle: f32 = 0.0;
+
     for (0..len) |x| {
         riverData.append(block.Block(T).init(block.Location().init(@intCast(x), 0, 0))) catch unreachable;
         swizzle(&riverData.items[x].location, Axis.Z, &theta_swizzle, 5.0);

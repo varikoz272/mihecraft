@@ -66,6 +66,12 @@ pub fn Location() type {
 
             return @sqrt(rl.powf(x1 - x0, 2.0) + rl.powf(z1 - z0, 2.0));
         }
+
+        pub fn Equals(self: Self, compared: Self) bool {
+            return (self.x == compared.x) and
+                (self.y == compared.y) and
+                (self.z == compared.z);
+        }
     };
 }
 
