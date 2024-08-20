@@ -16,7 +16,6 @@ pub fn River(comptime T: block.Type, len: usize, seed: u64, allocator: std.mem.A
         riverData.append(block.Block(T).init(block.Location().init(@intCast(x), 0, 0))) catch unreachable;
         swizzle(&riverData.items[x].location, Axis.Z, &theta_swizzle, 5.0);
         rotateSingle(T, &riverData.items[x], angle, riverData.items[0].location);
-        // riverData.append(cur_block) catch unreachable;
     }
 
     const river = Struct(T).arrayListInit(riverData);
@@ -75,6 +74,18 @@ pub fn Struct(comptime T: block.Type) type {
         }
     };
 }
+
+const Type = enum {
+    const Self = @This();
+
+    River,
+
+    pub fn CreateStruct(self: Self, comptime T: block.Type, len: usize, seed: u64, allocator: std.mem.Allocator) Struct(T) {
+        switch (self) {
+            .River => return River(T, len, seed, allocator),
+        }
+    }
+};
 
 const Axis = enum {
     const Self = @This();
