@@ -3,10 +3,9 @@ const block = @import("Block.zig");
 const std = @import("std");
 const stc = @import("Structure.zig");
 
-pub fn SingleStructureWorld(size: usize) type {
+pub fn SingleStructureWorld(comptime T: stc.Type, size: usize) type {
     return struct {
         const Self = @This();
-        pub const Size = size;
 
         allocator: std.mem.Allocator,
 
@@ -30,7 +29,8 @@ pub fn SingleStructureWorld(size: usize) type {
         }
 
         fn Fill(self: *Self, allocator: std.mem.Allocator) void {
-            self.single_struct = stc.River(block.Type.Water, Size, self.seed, allocator);
+            // self.single_struct = stc.River(block.Type.Water, Size, self.seed, allocator);
+            self.single_struct = T.CreateStruct(block.Type.Water, size, self.seed, allocator);
         }
 
         pub fn Draw(self: Self, cam_location: rl.Vector3) void {

@@ -3,6 +3,7 @@ const std = @import("std");
 const camera = @import("Camera.zig");
 const block = @import("Block.zig");
 const world = @import("World.zig");
+const stc = @import("Structure.zig");
 
 const SCREEN_WIDTH: c_int = 1920;
 const SCREEN_HEIGHT: c_int = 1080;
@@ -22,7 +23,7 @@ pub fn main() !void {
     var seed: u64 = 0;
 
     var cam = camera.Camera(camera.CameraType.from(rl.CAMERA_FIRST_PERSON)).Init(&cameraBuffer, "MAIN_CHARACTER");
-    var w = world.SingleStructureWorld(500).Generate(seed, gpa.allocator());
+    var w = world.SingleStructureWorld(stc.Type.River, 500).Generate(seed, gpa.allocator());
 
     rl.SetTargetFPS(60);
     rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "mihecraft");
@@ -33,7 +34,7 @@ pub fn main() !void {
         if ((!rl.IsKeyDown(rl.KEY_LEFT_SHIFT) and rl.IsKeyDown(rl.KEY_G)) or (rl.IsKeyPressed(rl.KEY_G) and rl.IsKeyDown(rl.KEY_LEFT_SHIFT))) {
             seed +%= 1;
             w.Destroy();
-            w = world.SingleStructureWorld(500).Generate(seed, gpa.allocator());
+            w = world.SingleStructureWorld(stc.Type.River, 500).Generate(seed, gpa.allocator());
         }
 
         cam.Update();

@@ -75,7 +75,7 @@ pub fn Struct(comptime T: block.Type) type {
     };
 }
 
-const Type = enum {
+pub const Type = enum {
     const Self = @This();
 
     River,
