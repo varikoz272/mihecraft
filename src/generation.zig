@@ -19,6 +19,10 @@ pub const BlockType = enum(u16) {
     }
 };
 
+pub const WorldError = error{
+    SameBlockPosition,
+};
+
 pub fn World() type {
     return struct {
         const Self = @This();
@@ -35,12 +39,15 @@ pub fn World() type {
             };
         }
 
-        pub fn putBlock(self: *Self, pos: rl.Vector3, T: BlockType) std.mem.Allocator.Error!void {
+        pub fn putBlock(self: *Self, pos: rl.Vector3, T: BlockType) (std.mem.Allocator.Error || WorldError)!void {
             try self.positions.append(pos);
             errdefer _ = self.positions.orderedRemove(self.positions.items.len - 1);
 
             var hash = try self.allocator.alloc(u8, 15);
             bufBlockHash(hash[0..hash.len], pos.x, pos.y, pos.z);
+
+            if (self.blocks.get(hash)) |_| return WorldError.SameBlockPosition;
+
             try self.blocks.put(hash[0..hash.len], T);
         }
 
@@ -68,11 +75,9 @@ pub fn World() type {
 pub fn flat_world(allocator: std.mem.Allocator) std.mem.Allocator.Error!World() {
     var world = World().init(allocator);
     for (0..10) |x| {
-        for (0..10) |z| try world.putBlock(rl.Vector3{
-            .x = @floatFromInt(x),
-            .y = 0.0,
-            .z = @floatFromInt(z),
-        }, .Grass);
+        for (0..10) |z| world.putBlock(rl.Vector3{ .x = @floatFromInt(x), .y = 0.0, .z = @floatFromInt(z) }, .Grass) catch |err| {
+            if (err == std.mem.Allocator.Error.OutOfMemory) return std.mem.Allocator.Error.OutOfMemory else unreachable;
+        };
     }
 
     return world;
