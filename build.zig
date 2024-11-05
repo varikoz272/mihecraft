@@ -18,9 +18,9 @@ pub fn build(b: *std.Build) !void {
 
     exe.linkLibC();
 
-    exe.addIncludePath(b.path("include/"));
-    exe.addIncludePath(b.path("include/external"));
-    exe.addIncludePath(b.path("include/external/glfw/include"));
+    exe.addIncludePath(b.path("raylib/src/"));
+    exe.addIncludePath(b.path("raylib/src/external"));
+    exe.addIncludePath(b.path("raylib/src/external/glfw/include"));
 
     exe.addObjectFile(switch (target.result.os.tag) {
         .windows => b.path("lib/raylib.lib"),
