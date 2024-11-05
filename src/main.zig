@@ -7,7 +7,7 @@ const SCREEN_HEIGHT: c_int = 1080;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const world = try gn.flat_world(gpa.allocator());
+    const world = try gn.perlin_noise_world(gpa.allocator());
 
     var cam = rl.Camera{
         .up = .{ .x = 0, .y = 1, .z = 0 },
@@ -25,8 +25,12 @@ pub fn main() !void {
     while (!rl.WindowShouldClose()) {
         rl.ClearBackground(rl.GRAY);
         rl.UpdateCamera(&cam, rl.CAMERA_FREE);
+
         rl.BeginDrawing();
         defer rl.EndDrawing();
+
+        rl.DrawFPS(10, 10);
+
         rl.BeginMode3D(cam);
         defer rl.EndMode3D();
         drawWorld(world);
@@ -40,5 +44,6 @@ pub fn drawWorld(world: gn.World()) void {
         const block = world.blockAt(pos) orelse unreachable;
         const color = block.color();
         rl.DrawCube(pos, 1.0, 1.0, 1.0, color);
+        rl.DrawCubeWires(pos, 1.0, 1.0, 1.0, rl.BLACK);
     }
 }

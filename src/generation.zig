@@ -58,7 +58,7 @@ pub fn World() type {
         }
 
         fn bufBlockHash(buf: []u8, x: f32, y: f32, z: f32) void {
-            _ = std.fmt.bufPrint(buf[0..buf.len], "{d:.3}{d:.3}{d:.3}", .{ x, y, z }) catch unreachable;
+            _ = std.fmt.bufPrint(buf[0..buf.len], "{d:.3}{d:.3}{d:.3}", .{ x, y, z }) catch {};
         }
 
         pub fn deinit(self: *Self) void {
@@ -70,6 +70,22 @@ pub fn World() type {
             self.blocks.deinit();
         }
     };
+}
+
+pub fn perlin_noise_world(allocator: std.mem.Allocator) std.mem.Allocator.Error!World() {
+    var world = World().init(allocator);
+    const perlin_noise_img = rl.GenImagePerlinNoise(100, 100, 0, 0, 1.0);
+    const perlin_noise_data: []rl.Color = @as([*]rl.Color, @ptrCast(perlin_noise_img.data.?))[0..@as(usize, @intCast(perlin_noise_img.width * perlin_noise_img.height))];
+    for (0..@intCast(perlin_noise_img.width)) |x| {
+        for (0..@intCast(perlin_noise_img.height)) |z| {
+            const y: f32 = @floatFromInt(perlin_noise_data[z * @as(usize, @intCast(perlin_noise_img.width)) + x].r / 10);
+            world.putBlock(rl.Vector3{ .x = @floatFromInt(x), .y = y, .z = @floatFromInt(z) }, .Grass) catch |err| {
+                if (err == std.mem.Allocator.Error.OutOfMemory) return std.mem.Allocator.Error.OutOfMemory else unreachable;
+            };
+        }
+    }
+
+    return world;
 }
 
 pub fn flat_world(allocator: std.mem.Allocator) std.mem.Allocator.Error!World() {
