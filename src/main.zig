@@ -22,6 +22,8 @@ pub fn main() !void {
     rl.DisableCursor();
     rl.SetTargetFPS(60);
 
+    const block_model = rl.LoadModel("resources/grass.glb");
+
     while (!rl.WindowShouldClose()) {
         rl.ClearBackground(rl.GRAY);
         rl.UpdateCamera(&cam, rl.CAMERA_FREE);
@@ -33,19 +35,13 @@ pub fn main() !void {
 
         rl.BeginMode3D(cam);
         defer rl.EndMode3D();
-        drawWorld(world);
+
+        var iter = world.blocks.iterator();
+        while (iter.next()) |entry| {
+            const pos = entry.key_ptr.asRlVector3();
+            rl.DrawModel(block_model, pos, 0.5, rl.WHITE);
+        }
     }
 
     rl.CloseWindow();
-}
-
-pub fn drawWorld(world: gn.World()) void {
-    var iter = world.blocks.iterator();
-    while (iter.next()) |entry| {
-        const pos = entry.key_ptr.asRlVector3();
-        const block = entry.value_ptr.*;
-        const color = block.color();
-        rl.DrawCube(pos, 1.0, 1.0, 1.0, color);
-        rl.DrawCubeWires(pos, 1.0, 1.0, 1.0, rl.BLACK);
-    }
 }
