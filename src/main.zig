@@ -40,8 +40,10 @@ pub fn main() !void {
 }
 
 pub fn drawWorld(world: gn.World()) void {
-    for (world.positions.items) |pos| {
-        const block = world.blockAt(pos) orelse unreachable;
+    var iter = world.blocks.iterator();
+    while (iter.next()) |entry| {
+        const pos = entry.key_ptr.asRlVector3();
+        const block = entry.value_ptr.*;
         const color = block.color();
         rl.DrawCube(pos, 1.0, 1.0, 1.0, color);
         rl.DrawCubeWires(pos, 1.0, 1.0, 1.0, rl.BLACK);

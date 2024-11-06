@@ -23,50 +23,74 @@ pub const WorldError = error{
     SameBlockPosition,
 };
 
+pub const Location = struct {
+    const Self = @This();
+
+    int_x: i32,
+    int_y: i32,
+    int_z: i32,
+
+    float_x: u8,
+    float_y: u8,
+    float_z: u8,
+
+    // TODO: unignore float
+    pub fn asRlVector3(self: Self) rl.Vector3 {
+        return rl.Vector3{
+            .x = @floatFromInt(self.int_x),
+            .y = @floatFromInt(self.int_y),
+            .z = @floatFromInt(self.int_z),
+        };
+    }
+};
+
 pub fn World() type {
     return struct {
         const Self = @This();
 
-        blocks: std.StringHashMap(BlockType),
-        positions: std.ArrayList(rl.Vector3),
+        blocks: std.AutoHashMap(Location, BlockType),
         allocator: std.mem.Allocator,
 
         pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
-                .blocks = std.StringHashMap(BlockType).init(allocator),
-                .positions = std.ArrayList(rl.Vector3).init(allocator),
+                .blocks = std.AutoHashMap(Location, BlockType).init(allocator),
                 .allocator = allocator,
             };
         }
 
         pub fn putBlock(self: *Self, pos: rl.Vector3, T: BlockType) (std.mem.Allocator.Error || WorldError)!void {
-            try self.positions.append(pos);
-            errdefer _ = self.positions.orderedRemove(self.positions.items.len - 1);
-
-            var hash = try self.allocator.alloc(u8, 15);
-            bufBlockHash(hash[0..hash.len], pos.x, pos.y, pos.z);
+            const hash = block_hash(pos);
 
             if (self.blocks.get(hash)) |_| return WorldError.SameBlockPosition;
 
-            try self.blocks.put(hash[0..hash.len], T);
+            try self.blocks.put(hash, T);
         }
 
         pub fn blockAt(self: Self, pos: rl.Vector3) ?BlockType {
-            var hash: [15]u8 = undefined;
-            bufBlockHash(hash[0..hash.len], pos.x, pos.y, pos.z);
-            return self.blocks.get(hash[0..hash.len]);
+            return self.blocks.get(block_hash(pos));
         }
 
-        fn bufBlockHash(buf: []u8, x: f32, y: f32, z: f32) void {
-            _ = std.fmt.bufPrint(buf[0..buf.len], "{d:.3}{d:.3}{d:.3}", .{ x, y, z }) catch {};
+        fn block_hash(pos: rl.Vector3) Location {
+            const int_x: i32 = @intFromFloat(pos.x);
+            const int_y: i32 = @intFromFloat(pos.y);
+            const int_z: i32 = @intFromFloat(pos.z);
+
+            const float_x: u8 = @intCast(@as(u256, @intFromFloat(pos.x * 100)) % 255);
+            const float_y: u8 = @intCast(@as(u256, @intFromFloat(pos.y * 100)) % 255);
+            const float_z: u8 = @intCast(@as(u256, @intFromFloat(pos.z * 100)) % 255);
+
+            return Location{
+                .int_x = int_x,
+                .int_y = int_y,
+                .int_z = int_z,
+
+                .float_x = float_x,
+                .float_y = float_y,
+                .float_z = float_z,
+            };
         }
 
         pub fn deinit(self: *Self) void {
-            self.positions.deinit();
-
-            var iter = self.blocks.iterator();
-            while (iter.next()) |entry| self.allocator.free(entry.key_ptr);
-
             self.blocks.deinit();
         }
     };
